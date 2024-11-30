@@ -7,18 +7,68 @@
 
 import SwiftUI
 
+extension PlayerInventory {
+    var description: String {
+        return "milk: \(milk) wool: \(wool)"
+    }
+}
+@Observable
+class GameState {
+//    var wool: Int
+//    var milk: Int
+//    
+    var player: Player
+    
+    init(player: Player) {
+        self.player = player
+//        self.wool = player.inventory.wool
+//        self.milk = player.inventory.milk
+    }
+}
+
 struct ContentView: View {
+    @State var gameState: GameState
+    
+    init(player: Player) {
+        self.gameState = GameState(player: player)
+    }
+    
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        NavigationStack {
+            ZStack {
+                Color.green.ignoresSafeArea()
+                
+                VStack {
+                    PlayerHUDView(playerName: gameState.player.name, milkCount: gameState.player.inventory.milk, woolCount: gameState.player.inventory.wool)
+                        .padding(.horizontal, 5)
+                    BarnView(barn: gameState.player.barn) { animal in
+                        print(animal.sayHi())
+                    } onGatherResources: { animal in
+                        animal.gatherResource(addTo: &gameState.player.inventory)
+                    }
+
+                }
+            }
         }
-        .padding()
     }
 }
 
 #Preview {
-    ContentView()
+    ContentView(
+        player: MyPlayer(
+            name: "Player name",
+            inventory: MyPlayerInventory(milk: 10, wool: 20),
+            barn: (0..<100).map{ i in
+                if i.isMultiple(of: 2) {
+                    return MyCow(name: "Cow \(i)")
+                }
+                
+                if i.isMultiple(of: 3) {
+                    return MySheep(name: "Sheep \(i)")
+                }
+                
+                return MyHorse(name: "Horse \(i)")
+            }.shuffled()
+        )
+    )
 }
