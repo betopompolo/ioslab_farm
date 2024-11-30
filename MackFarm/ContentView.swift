@@ -7,27 +7,17 @@
 
 import SwiftUI
 
-extension PlayerInventory {
-    var description: String {
-        return "milk: \(milk) wool: \(wool)"
-    }
-}
 @Observable
 class GameState {
-//    var wool: Int
-//    var milk: Int
-//    
     var player: Player
     
     init(player: Player) {
         self.player = player
-//        self.wool = player.inventory.wool
-//        self.milk = player.inventory.milk
     }
 }
 
 struct ContentView: View {
-    @State var gameState: GameState
+    @State private var gameState: GameState
     
     init(player: Player) {
         self.gameState = GameState(player: player)
@@ -39,14 +29,14 @@ struct ContentView: View {
                 Color.green.ignoresSafeArea()
                 
                 VStack {
-                    PlayerHUDView(playerName: gameState.player.name, milkCount: gameState.player.inventory.milk, woolCount: gameState.player.inventory.wool)
+                    PlayerHUDView(
+                        playerName: gameState.player.name,
+                        milkCount: gameState.player.inventory.milk,
+                        woolCount: gameState.player.inventory.wool
+                    )
                         .padding(.horizontal, 5)
-                    BarnView(barn: gameState.player.barn) { animal in
-                        print(animal.sayHi())
-                    } onGatherResources: { animal in
-                        animal.gatherResource(addTo: &gameState.player.inventory)
-                    }
 
+                    BarnView(player: $gameState.player)
                 }
             }
         }

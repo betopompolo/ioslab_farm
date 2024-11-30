@@ -21,7 +21,7 @@ class MyCow: Animal {
     }
     
     func sayHi() -> String {
-        return "A cow named \(name) says hi!"
+        return "\(name) says hi!"
     }
 }
 

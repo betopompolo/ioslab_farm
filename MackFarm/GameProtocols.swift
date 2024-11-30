@@ -18,7 +18,7 @@ protocol Animal {
 protocol Player {
     var name: String { get }
     var inventory: PlayerInventory { get set }
-    var barn: [Animal] { get set }
+    var barn: [any Animal] { get set }
 }
 
 protocol PlayerInventory {

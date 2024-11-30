@@ -7,15 +7,29 @@
 
 import SwiftUI
 
+@Observable
+class BarnAlert {
+    var message: String {
+        didSet {
+            isPresented = !message.isEmpty
+        }
+    }
+    var isPresented = false
+    
+    init(message: String = "") {
+        self.message = message
+    }
+}
+
 struct BarnView: View {
-    let barn: [Animal]
-    let onSayHi: (Animal) -> Void
-    let onGatherResources: (Animal) -> Void
+    private let secondsToDisplayHiMessage = 4.0
+    @Binding var player: Player
+    @State var alert = BarnAlert()
     
     var body: some View {
         ScrollView {
             LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4), spacing: 15) {
-                ForEach(barn, id: \.id) { animal in
+                ForEach(player.barn, id: \.id) { animal in
                     VStack {
                         Text(animal.emoji)
                             .font(.title)
@@ -23,36 +37,28 @@ struct BarnView: View {
                             .font(.caption)
                             .fontWeight(.semibold)
                     }
+                    .padding()
                     .contextMenu {
                         Button("Say hi") {
-                            onSayHi(animal)
+                            alert.message = animal.sayHi()
                         }
                         
                         Button("Gather resources") {
-                            onGatherResources(animal)
+                            animal.gatherResource(addTo: &player.inventory)
                         }
                     }
                 }
             }
         }
+        .alert(alert.message, isPresented: $alert.isPresented) {
+            Button("Nice!", role: .cancel) {
+                alert.message = ""
+            }
+        }
         .overlay {
-            if barn.isEmpty {
+            if player.barn.isEmpty {
                 Text("No animals on your barn yet 👨‍🌾")
             }
         }
     }
-}
-
-#Preview {
-    BarnView(
-        barn: [
-            MyCow(name: "Sally"),
-            MyHorse(name: "Bullseye"),
-            MyCow(name: "Mia"),
-            MyHorse(name: "Jairo")
-        ]) { _ in
-            print("say hi")
-        } onGatherResources: { _ in
-            print("gather resources")
-        }
 }
